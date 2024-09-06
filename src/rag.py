@@ -29,8 +29,6 @@ def split_into_chunks(text):
 def create_vector_storage(text):
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-mpnet-base-v2')
     chunks = split_into_chunks(text)
-    print("NB of chunks : ")
-    print(len(chunks))
     return FAISS.from_documents(chunks, embeddings)
     
 def launch_model(db):
@@ -63,10 +61,9 @@ def launch_model(db):
     prompt_template = """
 <s>[INST]
 You will be provided with some context below from a video transcription.
-Based on the context, answer the question by writing a small paragraph, no bullet points.
+Based on the context, answer the question by writing a simple sentence or a small paragraph, no bullet points.
 Do not use your knowledge, only answer based on the provided context.
-If the context does not provide the information for this question or you are not sure whether the questiion is related to the context, say it's not mentioned in the video.
-Write 100 words maximum.
+If the context does not provide the information for this question or you are not sure whether the questiion is related to the context, say that it is not mentioned in the video.
 
 ### CONTEXT:
 {context}
