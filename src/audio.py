@@ -6,17 +6,18 @@ from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 def extract_audio(filepath, url, output_filepath):
     """
     Generates a .mp3 file from either the provided file or the provided YouTube link.
-    Returns success.
+    Returns name of video.
     """
     if filepath and filepath != "": # File
-        return True
+        ## TODO
+        return ".mp4"
     elif url and url != "": # YouTube link
         yt = pt.YouTube(url)
         stream = yt.streams.filter(only_audio=True)[0]
         stream.download(filename=output_filepath)
-        return True
+        return yt.streams[0].title
     else:
-        return False
+        return None
 
 def transcript(filepath):
     """
