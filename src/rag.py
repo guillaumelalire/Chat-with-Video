@@ -34,7 +34,7 @@ def create_vector_storage(text):
     return FAISS.from_documents(chunks, embeddings)
     
 def launch_model(db):
-    model_name='mistralai/Mistral-7B-v0.1'
+    model_name='mistralai/Mistral-7B-Instruct-v0.2'
 
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -54,26 +54,26 @@ def launch_model(db):
         tokenizer=tokenizer,
         task="text-generation",
         temperature=0.2,
-        repetition_penalty=1.2,
+        do_sample=True,
+        repetition_penalty=1.4,
         return_full_text=False,
-        max_new_tokens=200,
+        max_new_tokens=400,
     )
 
     prompt_template = """
-### INSTRUCTION:
-You will be provided some context below.
-Based on the context, answer the question in as many details as possible by writing a small paragraph, no bullet points, no numbered list.
+<s>[INST]
+You will be provided with some context below from a video transcription.
+Based on the context, answer the question by writing a small paragraph, no bullet points.
 Do not use your knowledge, only answer based on the provided context.
-If the context does not provide information about the question, say it's not mentioned in the video.
-Do not generate new questions after answering.
+If the context does not provide the information for this question or you are not sure whether the questiion is related to the context, say it's not mentioned in the video.
+Write 100 words maximum.
 
 ### CONTEXT:
 {context}
 
 ### QUESTION:
 {question}
-
-### ANSWER:
+[/INST]
 """
 
     mistral_llm = HuggingFacePipeline(pipeline=text_generation_pipeline)
