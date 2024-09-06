@@ -2,6 +2,7 @@ import pytubefix as pt
 import whisper
 import re
 from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
+from moviepy.editor import VideoFileClip
 
 def extract_audio(filepath, url, output_filepath):
     """
@@ -9,8 +10,12 @@ def extract_audio(filepath, url, output_filepath):
     Returns name of video.
     """
     if filepath and filepath != "": # File
-        ## TODO
-        return ".mp4"
+        video_clip = VideoFileClip(filepath)
+        audio_clip = video_clip.audio
+        audio_clip.write_audiofile(output_filepath)
+        audio_clip.close()
+        video_clip.close()
+        return filepath
     elif url and url != "": # YouTube link
         yt = pt.YouTube(url)
         stream = yt.streams.filter(only_audio=True)[0]
