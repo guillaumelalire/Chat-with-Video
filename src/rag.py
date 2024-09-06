@@ -20,7 +20,7 @@ hugging_face_token = os.getenv('HUGGINGFACE_TOKEN')
 login(token=hugging_face_token) # Login to the Hugging Face Hub
 
 def split_into_chunks(text):
-    text_splitter = RecursiveCharacterTextSplitter(separators=['\n\n', '\n', '.', ' '], chunk_size=300, chunk_overlap=50)
+    text_splitter = RecursiveCharacterTextSplitter(separators=['\n\n', '\n', '.', ' '], chunk_size=1000, chunk_overlap=50)
     document = Document(
         page_content=text,
     )
@@ -29,6 +29,8 @@ def split_into_chunks(text):
 def create_vector_storage(text):
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-mpnet-base-v2')
     chunks = split_into_chunks(text)
+    print("NB of chunks : ")
+    print(len(chunks))
     return FAISS.from_documents(chunks, embeddings)
     
 def launch_model(db):
@@ -52,17 +54,27 @@ def launch_model(db):
         tokenizer=tokenizer,
         task="text-generation",
         temperature=0.2,
-        repetition_penalty=1.1,
-        return_full_text=True,
+        repetition_penalty=1.2,
+        return_full_text=False,
         max_new_tokens=200,
     )
 
-    prompt_template = """Answer the question based only on the following context:
+    prompt_template = """
+### INSTRUCTION:
+You will be provided some context below.
+Based on the context, answer the question in as many details as possible by writing a small paragraph, no bullet points, no numbered list.
+Do not use your knowledge, only answer based on the provided context.
+If the context does not provide information about the question, say it's not mentioned in the video.
+Do not generate new questions after answering.
 
-    {context}
+### CONTEXT:
+{context}
 
-    Question: {question}
-     """
+### QUESTION:
+{question}
+
+### ANSWER:
+"""
 
     mistral_llm = HuggingFacePipeline(pipeline=text_generation_pipeline)
 
